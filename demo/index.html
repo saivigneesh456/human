@@ -115,4 +115,70 @@
     <div id="log" class="log"></div>
     <div id="results" class="results"></div>
   </body>
+  <body>
+    <h1>Voice Recorder</h1>
+    
+    <button onclick="startRecording()">Start Recording</button>
+    <button onclick="stopRecording()">Stop Recording</button>
+    <button onclick="playRecording()">Play Recording</button>
+    
+    <span id="recordingDuration">00:00</span>
+    
+    <audio id="recordedAudio" controls></audio>
+    
+    <script>
+    let mediaRecorder;
+    let chunks = [];
+    let startTime;
+    
+    async function startRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = function(e) {
+                chunks.push(e.data);
+            };
+            startTime = Date.now();
+            updateTimer();
+            mediaRecorder.start();
+        } catch (err) {
+            console.error('Error accessing microphone:', err);
+        }
+    }
+    
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            updateTimer();
+        }
+    }
+    
+    function playRecording() {
+        if (chunks.length === 0) {
+            console.error('No recording available');
+            return;
+        }
+        const blob = new Blob(chunks, { type: 'audio/wav' });
+        const url = URL.createObjectURL(blob);
+        const audio = document.getElementById('recordedAudio');
+        audio.src = url;
+        audio.play();
+    }
+    
+    function updateTimer() {
+        const elapsedTime = Date.now() - startTime;
+        const minutes = Math.floor(elapsedTime / 60000);
+        const seconds = Math.floor((elapsedTime % 60000) / 1000);
+        const formattedTime = pad(minutes) + ':' + pad(seconds);
+        document.getElementById('recordingDuration').textContent = formattedTime;
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            setTimeout(updateTimer, 1000);
+        }
+    }
+    
+    function pad(num) {
+        return (num < 10 ? '0' : '') + num;
+    }
+    </script>
+    </body>
 </html>
