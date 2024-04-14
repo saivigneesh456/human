@@ -1,6 +1,4 @@
-/**
- * PWA Service Worker for Human main demo
- */
+
 
 /* eslint-disable no-restricted-globals */
 /// <reference lib="webworker" />
